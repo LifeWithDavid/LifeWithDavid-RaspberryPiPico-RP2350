@@ -1,0 +1,130 @@
+*****List of Commands for RISCy Business, Act 03 - Doom on the RP2350
+
+*******************************
+---Installing the Pico toolchain, examples, extras and playground
+
+sudo apt install wget
+wget https://raw.githubusercontent.com/raspberrypi/pico-setup/master/pico_setup.sh
+chmod +x pico_setup.sh
+./pico_setup.sh
+sudo reboot
+
+*******************************
+---Updating the SDK
+
+cd ~/pico-sdk
+git pull
+git submodule update
+
+*******************************
+
+---Installing GCC 13.3
+
+cd /usr/local
+sudo tar -xvf ~/Downloads/arm-gnu-toolchain-13.3.rel1-aarch64-arm-none-eabi.tar.xz
+
+*******************************
+
+---Installing SDL2 version 2.0.0 and dependencies
+
+cd ~
+sudo apt-get install libsdl2-2.0-0
+sudo apt-get install libsdl2-dev
+sudo apt-get install libsdl2-mixer-dev
+sudo apt-get install libsdl2-net-dev
+
+
+
+
+******************************
+
+---install Risc-V toolchain 
+
+cd /usr/local
+sudo tar -xvzf ~/Downloads/riscv-toolchain-14-aarch64-lin.tar.gz
+
+******************************
+
+---Get the Doom source files and extract them to the /~/pico folder using Extract files
+
+******************************
+
+---Initialize Tiny USB module
+
+cd ~/pico-sdk
+git submodule update --init
+
+******************************
+
+--- Build Doom Game Engine for RP2040
+
+cd ~/pico/rp2040-doom-rp2/build_rp2040/
+cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DPICO_TOOLCHAIN_PATH=/usr/local/arm-gnu-toolchain-13.3.rel1-aarch64-arm-none-eabi/bin -DPICO_BOARD=vgaboard -DPICO_SDK_PATH=~/pico/pico-sdk -DPICO_EXTRAS_PATH=~/pico/pico-extras ..
+make
+
+******************************
+
+---Install Game file for RP2040 (first load in game engine using boot select, then enter boot select again)
+
+picotool info -a
+cd ..
+picotool load -v -t bin doom1.whx -o 0x10042000
+  
+******************************
+
+---Build Doom Game Engine for RP2350 ARM cores
+
+cd ~/pico/rp2040-doom-rp2/build_rp2350-arm-s/
+cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DPICO_TOOLCHAIN_PATH=/usr/local/arm-gnu-toolchain-13.3.rel1-aarch64-arm-none-eabi/bin -DPICO_BOARD=vgaboard -DPICO_PLATFORM=rp2350-arm-s -DPICO_SDK_PATH=~/pico/pico-sdk -DPICO_EXTRAS_PATH=~/pico/pico-extras ..
+make
+
+******************************
+
+---Install Game file for RP2350 ARM cores (first load in game engine using boot select, then enter boot select again)
+
+picotool info -a
+cd ..
+picotool load -v -t bin doom1.whx -o 0x10042000
+
+******************************
+
+---UNSUCCESSFUL attempt to build Doom Game File for RP2350 Risc-V cores
+
+cd ~/pico/rp2040-doom-rp2/build_rp2350-riscv/
+cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DPICO_PLATFORM=rp2350-riscv -DPICO_BOARD=vgaboard -DPICO_SDK_PATH=~/pico/pico-sdk -Dpicotool_DIR=/usr/local/bin/picotool -DPICO_EXTRAS_PATH=~/pico/pico-extras ..
+make
+
+******************************
+
+---Installing picotool
+
+cd /usr/local/
+sudo tar -xvzf ~/Downloads/picotool-2.1.0-aarch64-lin.tar.gz
+
+
+******************************
+
+---Building whd_gen
+
+cd ~/pico/rp2040-doom-rp2/build/
+cmake ..
+make
+chmod +x ~/pico/rp2040-doom-rp2/build/src/whd_gen/whd_gen
+
+******************************
+
+---Creating a .whd file from a .WAD file
+
+
+
+cd ~/pico/rp2040-doom-rp2/build//src/whd_gen
+./whd_gen ~/pico/rp2040-doom-rp2/doom2WAD/DOOM2.WAD ~/pico/rp2040-doom-rp2/doom2WAD/DOOM2.whd  -no-super-tiny
+
+*******************************
+
+---UNCUCCESSFUL attempt to convert DOOM2.WAD to a .whx file
+
+cd ~/pico/rp2040-doom-rp2/build//src/whd_gen
+./whd_gen ~/pico/rp2040-doom-rp2/doom2WAD/DOOM2.WAD ~/pico/rp2040-doom-rp2/doom2WAD/DOOM2.whx
+
+
